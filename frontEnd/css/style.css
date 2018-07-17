@@ -1,0 +1,70 @@
+html, body {
+    padding: 0px;
+    margin: 0px;
+    background: #e6e6e6;
+}
+
+.postWindow{
+    background: #f2f2f2;
+    height: 39em;
+    margin-top: 1em;
+    -webkit-box-shadow: 4px 4px 1px 0px rgba(0,0,0,0.1);
+    box-shadow: 4px 4px 1px 0px rgba(0,0,0,0.1);
+
+}
+
+.nav{
+    background: #609;
+    width: 100%;
+    height: 3em;
+    padding: 0.5em 5%;
+    justify-content: space-between
+}
+
+h3{
+    color: #fff;
+}
+.logo{
+    float: right
+}
+
+.formPost{
+    padding-top: 1em;
+    border-top: #fff solid 2px;
+    -webkit-box-shadow: 0px -2px 5px -1px rgba(0,0,0,0.1);
+    -moz-box-shadow: 0px -2px 5px -1px rgba(0,0,0,0.1);
+    box-shadow: 0px -2px 5px -1px rgba(0,0,0,0.1);
+
+}
+
+.postContainer{
+    width: 100%;
+    height: 25em;
+    overflow: auto;
+}
+
+.btnsContainer, .btnPost{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    flex-direction: column
+}
+
+.btnAction{
+    width: 50px;
+    height: 50px;
+    margin: auto;
+}
+
+.deleteBtn{
+    background-image: url('../imgs/delete.svg');
+}
+.editBtn{
+    background-image: url('../imgs/upload.svg');
+}
+.post{
+    border: #609 solid 1px;
+    margin: 1em 0;
+    padding: 0 2%;
+    border-radius: 5px
+}

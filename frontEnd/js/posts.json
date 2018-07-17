@@ -1,0 +1,22 @@
+{
+    "posts": [
+    {
+    "title": "Post 1 Title",
+    "body": "This is the body of my first post, I am so happy.",
+    "owner": "Esteban",
+    "timestamp": 1527191177792
+    },
+    {
+    "title": "Post 2 Title",
+    "body": "This is the body of my second post.",
+    "owner": "Esteban",
+    "timestamp": 1527191235832
+    },
+    {
+    "title": "Post 3 Title",
+    "body": "This is the body of my third post.",
+    "owner": "Esteban",
+    "timestamp": 1527191247678
+    }
+    ]
+    }
