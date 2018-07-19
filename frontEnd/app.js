@@ -87,7 +87,7 @@ function init() {
     } else {
       var post = new Post(null, titleTxt.value, bodyTxt.value, owner, true);
       var request = new XMLHttpRequest();
-      request.open('Post', urlBase, true);
+      request.open('POST', urlBase, true);
       request.setRequestHeader('Access-Control-Allow-Origin', '*')
       request.onreadystatechange = sendPostCallback;
       request.send(JSON.stringify(post));

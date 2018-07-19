@@ -3,7 +3,7 @@ var http = require('http');
 var url = require('url');
 var fs = require('fs');
 var path = require('path');
-var uniqid = requiere('uniqid');
+var uniqid = require('uniqid');
 
 var port = 3000;
 var localHost = 'localhost';
@@ -34,18 +34,27 @@ var server = http.createServer(function (request, response) {
                 case 'POST':
                     postPost(request, response);
                     break;
+                case 'PATCH':
+                    updatePost(request, response);
+                    break;
+                case 'DELETE':
+                    deletePost(request, response, parseUrl.query.key);
+                    break;
                 default:
+                    send404(request, response);
                     break;
             }
 
             break;
-
         default:
+            console.log('Request not porecess')
+            send404(request, response);
             break;
     }
 
 
     let data = [];
+
     request.on('data', function (chunk) {
         // data.push(chunk);
     });
@@ -91,23 +100,33 @@ function loadPosts() {
 function loadPostPromiseExecuter(resolve, reject) {
     fs.readFile(path.resolve(process.cwd(), './data/posts.json'), function (err, data) {
         if (err) {
-            reject();
+            reject(null);
         } else {
-            var postsData = JSON.parse(data);
-            var post = postsData['posts'];
+            //var postsData = JSON.parse(data);
+            //var post = postsData['posts'];
             //console.log(post);
-
+            var post = JSON.parse(data);
             resolve(post);
         }
     })
 }
 
-function getPost(request, response) {
+function savePosts(posts){
+    return new Promise(function (resolve, reject){
+        fs.writeFile(path.resolve(process.cwd(), './data/posts.json'),JSON.stringify(posts), function (err){
+            if (err){
+                reject();
+            }else{
+                resolve();
+            };
+        });
+    });
+};
+
+/*function getPost(request, response) {
     addCrossHeaders(request, response);
 
-    console.log('getPosts');
-
-
+    console.log('');
 
     loadPosts().then(resolve).catch(reject);
 
@@ -123,10 +142,30 @@ function getPost(request, response) {
         response.writeHead(404)
         response.end();
     }
+}*/
+
+function getPost(request, response){
+    addCrossHeaders(request, response);
+
+    loadPosts().then(function (post){
+        response.writeHead(200, {
+            'Content-Type': 'application/json'
+        });
+
+        response.write(JSON.stringify(posts));
+        response.end();
+    }).catch(function (){
+        send404(request, response)
+    });
 }
 
 function respondToOptions(request, response) {
     addCrossHeaders(request, response);
+
+    console.log(request);
+    console.log(request);
+    
+    
 
     response.writeHead(200);
     response.end();
@@ -139,10 +178,82 @@ function postPost(request, response) {
     let buffer = [];
     let post = null;
 
-    request.on('end', function () {
-        buffer = Buffer.concat(buffer).toString();
-        post = JSON.parse(buffer);
-        savePo
+    request.on('data', function (chunk){
+        buffer.push(chunk);
     })
 
+    request.on('end', function () {
+
+        buffer = Buffer.concat(buffer).toString();
+        post = JSON.parse(buffer);
+
+        loadPosts().then(function (posts){
+            posts[uniqid()] = post;
+            savePosts(posts).then(function () {
+                response.writeHead(200);
+                response.end();
+            }).catch(function(){
+                send404(request, response);
+            });
+        }).catch(function (){
+            send404(request, response);
+        });
+    });
+
+};
+
+function deletePost(request, response, key) {
+    addCrossHeaders(request, response);
+
+    loadPosts().then(function (post) {
+        delete post[key];
+
+        savePosts(post).then(function () {
+            response.writeHead(200);
+            response.end();
+        }).catch(function () {
+            send404(request, response);
+        });
+    }).catch(function () {
+        send404(request, response);
+    })
+}
+
+function updatePost(request, response){
+    addCrossHeaders(request, response);
+
+    let buffer = [];
+    let post = null;
+
+    request.on('data', function (chunk){
+        buffer.push(chunk);
+    });
+
+    request.on('end', function(){
+        buffer = Buffer.concat(buffer).toString();
+        post = JSON.parse(buffer);
+
+        console.log(post);
+
+        loadPosts().then(function (posts){
+
+            for(const key in posts){
+                for(const keyToUpdate in post){
+                    if(key === keyToUpdate){
+                        posts[key] = post[key];
+                    }
+                }
+            }
+        }).catch(function(){
+            send404(request, response);
+        });
+    })
+}
+
+function send404(request, response) {
+    addCrossHeaders(request, response);
+    response.writeHead(404, {
+        'Content-Type': 'application/json'
+    });
+    response.end();
 }
