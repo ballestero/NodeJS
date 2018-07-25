@@ -44,7 +44,6 @@ var server = http.createServer(function (request, response) {
                     send404(request, response);
                     break;
             }
-
             break;
         default:
             console.log('Request not porecess')
@@ -94,36 +93,35 @@ function addCrossHeaders(request, response) {
 }
 
 function loadPosts() {
-    return new Promise(loadPostPromiseExecuter);
+    return new Promise((resolve, reject) => {
+        fs.readFile(path.resolve(process.cwd(), './data/posts.json'), function (err, data) {
+            if (err) {
+                reject(null);
+            } else {
+                //var postsData = JSON.parse(data);
+                //var post = postsData['posts'];
+                //console.log(post);
+                var post = JSON.parse(data);
+                resolve(post);
+            }
+        })
+    });
 }
 
-function loadPostPromiseExecuter(resolve, reject) {
-    fs.readFile(path.resolve(process.cwd(), './data/posts.json'), function (err, data) {
-        if (err) {
-            reject(null);
-        } else {
-            //var postsData = JSON.parse(data);
-            //var post = postsData['posts'];
-            //console.log(post);
-            var post = JSON.parse(data);
-            resolve(post);
-        }
-    })
-}
 
-function savePosts(posts){
-    return new Promise(function (resolve, reject){
-        fs.writeFile(path.resolve(process.cwd(), './data/posts.json'),JSON.stringify(posts), function (err){
-            if (err){
+function savePosts(posts) {
+    return new Promise(function (resolve, reject) {
+        fs.writeFile(path.resolve(process.cwd(), './data/posts.json'), JSON.stringify(posts), function (err) {
+            if (err) {
                 reject();
-            }else{
+            } else {
                 resolve();
             };
         });
     });
 };
 
-/*function getPost(request, response) {
+function getPost(request, response) {
     addCrossHeaders(request, response);
 
     console.log('');
@@ -142,9 +140,9 @@ function savePosts(posts){
         response.writeHead(404)
         response.end();
     }
-}*/
+}
 
-function getPost(request, response){
+/*function getPost(request, response){
     addCrossHeaders(request, response);
 
     loadPosts().then(function (post){
@@ -157,15 +155,10 @@ function getPost(request, response){
     }).catch(function (){
         send404(request, response)
     });
-}
+}*/
 
 function respondToOptions(request, response) {
     addCrossHeaders(request, response);
-
-    console.log(request);
-    console.log(request);
-    
-    
 
     response.writeHead(200);
     response.end();
@@ -178,7 +171,7 @@ function postPost(request, response) {
     let buffer = [];
     let post = null;
 
-    request.on('data', function (chunk){
+    request.on('data', function (chunk) {
         buffer.push(chunk);
     })
 
@@ -187,15 +180,15 @@ function postPost(request, response) {
         buffer = Buffer.concat(buffer).toString();
         post = JSON.parse(buffer);
 
-        loadPosts().then(function (posts){
+        loadPosts().then(function (posts) {
             posts[uniqid()] = post;
             savePosts(posts).then(function () {
                 response.writeHead(200);
                 response.end();
-            }).catch(function(){
+            }).catch(function () {
                 send404(request, response);
             });
-        }).catch(function (){
+        }).catch(function () {
             send404(request, response);
         });
     });
@@ -219,32 +212,35 @@ function deletePost(request, response, key) {
     })
 }
 
-function updatePost(request, response){
+function updatePost(request, response) {
     addCrossHeaders(request, response);
 
     let buffer = [];
     let post = null;
 
-    request.on('data', function (chunk){
+    request.on('data', function (chunk) {
         buffer.push(chunk);
+        console.log('N1: ' + buffer);
+
     });
 
-    request.on('end', function(){
+    request.on('end', function () {
         buffer = Buffer.concat(buffer).toString();
+        console.log('N2: ' + buffer);
         post = JSON.parse(buffer);
 
         console.log(post);
 
-        loadPosts().then(function (posts){
+        loadPosts().then(function (posts) {
 
-            for(const key in posts){
-                for(const keyToUpdate in post){
-                    if(key === keyToUpdate){
+            for (const key in posts) {
+                for (const keyToUpdate in post) {
+                    if (key === keyToUpdate) {
                         posts[key] = post[key];
                     }
                 }
             }
-        }).catch(function(){
+        }).catch(function () {
             send404(request, response);
         });
     })

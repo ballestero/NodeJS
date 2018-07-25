@@ -86,8 +86,10 @@ function init() {
 
     } else {
       var post = new Post(null, titleTxt.value, bodyTxt.value, owner, true);
+      console.log(post);
+
       var request = new XMLHttpRequest();
-      request.open('POST', urlBase, true);
+      request.open('POST', urlBase + '/posts', true);
       request.setRequestHeader('Access-Control-Allow-Origin', '*')
       request.onreadystatechange = sendPostCallback;
       request.send(JSON.stringify(post));
@@ -104,13 +106,18 @@ function init() {
 
     titleTxt.value = ppostInfo.title;
     bodyTxt.value = ppostInfo.body;
-
-
   }
+
+
   function updateBtnOnClick() {
 
+    var postJson = null;
+
     var request = new XMLHttpRequest();
-    request.open('PATCH', urlBase, true);
+    console.log('ok');
+    request.open('PATCH', urlBase + '/posts', true);
+    request.setRequestHeader('Access-Control-Allow-Origin', '*');
+    //request.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
     request.onreadystatechange = function () {
       if (request.readyState === XMLHttpRequest.DONE) {
 
@@ -121,16 +128,12 @@ function init() {
 
         var fbkey = post.fbkey;
         post.fbkey = null;
-        var postJson = '{' + JSON.stringify(fbkey) + ':' + JSON.stringify(post) + '}';
+        postJson = '{' + JSON.stringify(fbkey) + ':' + JSON.stringify(post) + '}';
 
-        request.send(postJson);
-
+        console.log(postJson);
       }
-    }
-    request.setRequestHeader('Access-Control-Allow-Origin', '*');
-
-
-
+    };
+    request.send(postJson);
 
     postBtn.hidden = false;
     updateBtn.hidden = true;
@@ -178,9 +181,9 @@ function init() {
     console.log(ppostInfo.fbkey);
 
     if (confirm('Estas seguro de borrar este post')) {
-      var url = "https://theevilmouseblog.firebaseio.com/posts/" + ppostInfo.fbkey + ".json";
+      //var url = "https://theevilmouseblog.firebaseio.com/posts/" + ppostInfo.fbkey + ".json";
       var request = new XMLHttpRequest();
-      request.open('DELETE', url, true);
+      request.open('DELETE', urlBase + '/posts.json.' + ppostInfo.fbkey, true);
       request.onreadystatechange = deletePostCallback;
       request.send();
       //removeSelectedPostStyle();
