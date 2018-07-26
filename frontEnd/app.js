@@ -3,7 +3,7 @@ window.addEventListener('load', init, false);
 function init() {
 
   //firebaseInit();
-  var urlBase = "http://localhost:3000";
+  var urlBase = "http://localhost:3000/";
   var titleTxt = document.getElementById('titleTxt');
   var bodyTxt = document.getElementById('bodyTxt');
   var postBtn = document.getElementById('postBtn');
@@ -93,44 +93,66 @@ function init() {
       request.setRequestHeader('Access-Control-Allow-Origin', '*')
       request.onreadystatechange = sendPostCallback;
       request.send(JSON.stringify(post));
+
+      cleanForm();
     }
 
   };
 
 
   function updatePost(ppostInfo) {
-    console.log(ppostInfo.fbkey + ' ' + ppostInfo.owner);
+    console.log(ppostInfo.fbkey + ' ' +ppostInfo.title + ' ' +ppostInfo.body + ' ' + ppostInfo.owner);
     postBtn.hidden = true;
     updateBtn.hidden = false;
     cancelBtn.hidden = false;
 
     titleTxt.value = ppostInfo.title;
     bodyTxt.value = ppostInfo.body;
+
+    console.log('¿? '+titleTxt.value +' '+bodyTxt.value);
+    
   }
 
 
   function updateBtnOnClick() {
 
+    let titleTxt2 = document.getElementById('titleTxt');
+    let bodyTxt2 = document.getElementById('bodyTxt');
+
     var postJson = null;
 
     var request = new XMLHttpRequest();
     console.log('ok');
-    request.open('PATCH', urlBase + '/posts', true);
+    request.open('PATCH', urlBase + 'posts', true);
     request.setRequestHeader('Access-Control-Allow-Origin', '*');
+
     //request.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
     request.onreadystatechange = function () {
-      if (request.readyState === XMLHttpRequest.DONE) {
+      if (request.readyState === XMLHttpRequest.DONE ) {
+        console.log(currentPostSelected);
 
+        currentPostSelected.title = titleTxt2.value;
+        currentPostSelected.body= bodyTxt2.value;
+
+        console.log(currentPostSelected);
+        
         var post = currentPostSelected;
-        post.title = titleTxt.value;
-        post.body = bodyTxt.value;
+        //post.title = titleTxt.value;
+        //post.body = bodyTxt.value;
         post.timestamp = new Date();
+    
+
+        console.log(titleTxt2.value);
+        console.log(bodyTxt2.value);
+        
+        
 
         var fbkey = post.fbkey;
         post.fbkey = null;
         postJson = '{' + JSON.stringify(fbkey) + ':' + JSON.stringify(post) + '}';
 
         console.log(postJson);
+        cleanForm();
       }
     };
     request.send(postJson);
@@ -138,6 +160,8 @@ function init() {
     postBtn.hidden = false;
     updateBtn.hidden = true;
     cancelBtn.hidden = true;
+
+    
 
   };
 
@@ -161,6 +185,8 @@ function init() {
     updateBtn.hidden = true;
     cancelBtn.hidden = true;
 
+    cleanForm();
+
   };
 
   function deletePostCallback(event) {
@@ -179,11 +205,13 @@ function init() {
 
   function deleteBtnOnClick(ppostInfo) {
     console.log(ppostInfo.fbkey);
-
+   
+    //urlBase + '/posts/' + ppostInfo.fbkey + '.json'
     if (confirm('Estas seguro de borrar este post')) {
+      var urlX= urlBase + 'posts?query=' + ppostInfo.fbkey;
       //var url = "https://theevilmouseblog.firebaseio.com/posts/" + ppostInfo.fbkey + ".json";
       var request = new XMLHttpRequest();
-      request.open('DELETE', urlBase + '/posts.json.' + ppostInfo.fbkey, true);
+      request.open('DELETE', urlX, true);
       request.onreadystatechange = deletePostCallback;
       request.send();
       //removeSelectedPostStyle();
@@ -227,5 +255,11 @@ function init() {
         return null;
       }
     }
+  }
+
+
+  function cleanForm() {
+    titleTxt.value= null;
+    bodyTxt.value= null;
   }
 }

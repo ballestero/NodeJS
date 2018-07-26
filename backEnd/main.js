@@ -11,13 +11,14 @@ var localHost = 'localhost';
 var server = http.createServer(function (request, response) {
     var parseUrl = url.parse(request.url, true);
     var path = parseUrl.pathname;
-    var method = request.method;
-    var query = parseUrl.query;
-    var buffer = '';
     path = path.replace(/^\/+|\/+$/g, '');
-    var headers = request.headers;
 
-    console.log(path);
+    var method = request.method;
+    //var query = parseUrl.query;
+    //var buffer = '';
+    //var headers = request.headers;
+
+    //console.log(path);
     console.log(method);
 
 
@@ -42,6 +43,7 @@ var server = http.createServer(function (request, response) {
                     break;
                 default:
                     send404(request, response);
+                    console.log('Shit');
                     break;
             }
             break;
@@ -52,23 +54,6 @@ var server = http.createServer(function (request, response) {
     }
 
 
-    let data = [];
-
-    request.on('data', function (chunk) {
-        // data.push(chunk);
-    });
-
-    request.on('end', function (chunk) {
-        /*
-        body = Buffer.concat(body).toString();
-        body =JSON.parse(body);
-        console.log(body);*/
-    })
-    //console.log(`cliente solicitando ${path}, y el metodo: ${method}, y el query ${query.posts}`);
-    //console.log(path);
-
-
-    //response.end('<h1>hola Mundo</h1>');
 });
 
 
@@ -86,17 +71,25 @@ function addCrossHeaders(request, response) {
         origin = request.headers['origin']
     }
 
+    //response.setHeader('Access-Control-Allow-Origin', origin);
+    //response.setHeader('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE');
+    //response.setHeader('Access-Control-Allow-Headers', 'access-control-allow-credentials');
+    //response.setHeader('Access-Control-Allow-Headers', 'access-control-allow-origin');
     response.setHeader('Access-Control-Allow-Origin', origin);
-    response.setHeader('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE');
-    response.setHeader('Access-Control-Allow-Headers', 'access-control-allow-credentials');
-    response.setHeader('Access-Control-Allow-Headers', 'access-control-allow-origin');
+    response.setHeader('Access-Control-Allow-Methods', 'GET,POST, OPTIONS, PUT, DELETE, PATCH');
+
+    if (request.headers['content-type']) {
+        response.setHeader('Content-Type', request.headers['content-type']);
+    }
+
+    response.setHeader('Access-Control-Allow-Headers', 'Access-Control-Allow-Origin, Acces-Control-Allow-Methods, Content-Type');
 }
 
 function loadPosts() {
     return new Promise((resolve, reject) => {
         fs.readFile(path.resolve(process.cwd(), './data/posts.json'), function (err, data) {
             if (err) {
-                reject(null);
+                reject();
             } else {
                 //var postsData = JSON.parse(data);
                 //var post = postsData['posts'];
@@ -159,7 +152,6 @@ function getPost(request, response) {
 
 function respondToOptions(request, response) {
     addCrossHeaders(request, response);
-
     response.writeHead(200);
     response.end();
 
@@ -198,10 +190,14 @@ function postPost(request, response) {
 function deletePost(request, response, key) {
     addCrossHeaders(request, response);
 
-    loadPosts().then(function (post) {
-        delete post[key];
+    loadPosts().then(function (posts) {
+        
+        delete posts[key];
 
-        savePosts(post).then(function () {
+        savePosts(posts).then(function () {
+            console.log(post);
+            console.log(posts);
+            
             response.writeHead(200);
             response.end();
         }).catch(function () {
@@ -217,29 +213,28 @@ function updatePost(request, response) {
 
     let buffer = [];
     let post = null;
-
+    
     request.on('data', function (chunk) {
         buffer.push(chunk);
         console.log('N1: ' + buffer);
-
     });
 
     request.on('end', function () {
+
         buffer = Buffer.concat(buffer).toString();
         console.log('N2: ' + buffer);
         post = JSON.parse(buffer);
+
 
         console.log(post);
 
         loadPosts().then(function (posts) {
 
-            for (const key in posts) {
-                for (const keyToUpdate in post) {
-                    if (key === keyToUpdate) {
-                        posts[key] = post[key];
-                    }
-                }
-            }
+            posts[post.key]=post;
+            savePosts(posts).then(function () {
+                response.writeHead(200);
+                response.end();
+            })
         }).catch(function () {
             send404(request, response);
         });
