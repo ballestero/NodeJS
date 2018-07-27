@@ -101,7 +101,7 @@ function init() {
 
 
   function updatePost(ppostInfo) {
-    console.log(ppostInfo.fbkey + ' ' +ppostInfo.title + ' ' +ppostInfo.body + ' ' + ppostInfo.owner);
+    console.log(ppostInfo.fbkey + ' ' + ppostInfo.title + ' ' + ppostInfo.body + ' ' + ppostInfo.owner);
     postBtn.hidden = true;
     updateBtn.hidden = false;
     cancelBtn.hidden = false;
@@ -109,8 +109,8 @@ function init() {
     titleTxt.value = ppostInfo.title;
     bodyTxt.value = ppostInfo.body;
 
-    console.log('¿? '+titleTxt.value +' '+bodyTxt.value);
-    
+    console.log('¿? ' + titleTxt.value + ' ' + bodyTxt.value);
+
   }
 
 
@@ -128,30 +128,30 @@ function init() {
 
     //request.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
     request.onreadystatechange = function () {
-      if (request.readyState === XMLHttpRequest.DONE ) {
+      if (request.readyState === XMLHttpRequest.DONE) {
         console.log(currentPostSelected);
 
         currentPostSelected.title = titleTxt2.value;
-        currentPostSelected.body= bodyTxt2.value;
+        currentPostSelected.body = bodyTxt2.value;
 
         console.log(currentPostSelected);
-        
+
         var post = currentPostSelected;
         //post.title = titleTxt.value;
         //post.body = bodyTxt.value;
         post.timestamp = new Date();
-    
+
 
         console.log(titleTxt2.value);
         console.log(bodyTxt2.value);
-        
-        
+
+
 
         var fbkey = post.fbkey;
         post.fbkey = null;
         postJson = '{' + JSON.stringify(fbkey) + ':' + JSON.stringify(post) + '}';
 
-        console.log(postJson);
+        console.log(JSON.parse(postJson));
         cleanForm();
       }
     };
@@ -161,7 +161,7 @@ function init() {
     updateBtn.hidden = true;
     cancelBtn.hidden = true;
 
-    
+
 
   };
 
@@ -205,14 +205,16 @@ function init() {
 
   function deleteBtnOnClick(ppostInfo) {
     console.log(ppostInfo.fbkey);
-   
-    //urlBase + '/posts/' + ppostInfo.fbkey + '.json'
+
+    console.log(urlBase + 'posts?query=' + ppostInfo.fbkey);
+
+
     if (confirm('Estas seguro de borrar este post')) {
-      var urlX= urlBase + 'posts?query=' + ppostInfo.fbkey;
-      //var url = "https://theevilmouseblog.firebaseio.com/posts/" + ppostInfo.fbkey + ".json";
+      var urlX = urlBase + 'posts?query=' + ppostInfo.fbkey;
       var request = new XMLHttpRequest();
       request.open('DELETE', urlX, true);
       request.onreadystatechange = deletePostCallback;
+      request.setRequestHeader('Access-Control-Allow-Origin', '*');
       request.send();
       //removeSelectedPostStyle();
     }
@@ -259,7 +261,7 @@ function init() {
 
 
   function cleanForm() {
-    titleTxt.value= null;
-    bodyTxt.value= null;
+    titleTxt.value = null;
+    bodyTxt.value = null;
   }
 }

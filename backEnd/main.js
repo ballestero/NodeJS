@@ -14,12 +14,12 @@ var server = http.createServer(function (request, response) {
     path = path.replace(/^\/+|\/+$/g, '');
 
     var method = request.method;
-    //var query = parseUrl.query;
-    //var buffer = '';
-    //var headers = request.headers;
+    var query = parseUrl.query;
+    var buffer = '';
+    var headers = request.headers;
 
-    //console.log(path);
     console.log(method);
+
 
 
 
@@ -39,11 +39,13 @@ var server = http.createServer(function (request, response) {
                     updatePost(request, response);
                     break;
                 case 'DELETE':
-                    deletePost(request, response, parseUrl.query.key);
+                    //console.log('X1 ' + query);
+                    //console.log('X2 ' + parseUrl.query.key);
+
+                    deletePost(request, response, query.query);
                     break;
                 default:
                     send404(request, response);
-                    console.log('Shit');
                     break;
             }
             break;
@@ -191,13 +193,13 @@ function deletePost(request, response, key) {
     addCrossHeaders(request, response);
 
     loadPosts().then(function (posts) {
-        
+
         delete posts[key];
 
         savePosts(posts).then(function () {
             console.log(post);
             console.log(posts);
-            
+
             response.writeHead(200);
             response.end();
         }).catch(function () {
@@ -213,7 +215,7 @@ function updatePost(request, response) {
 
     let buffer = [];
     let post = null;
-    
+
     request.on('data', function (chunk) {
         buffer.push(chunk);
         console.log('N1: ' + buffer);
@@ -230,7 +232,7 @@ function updatePost(request, response) {
 
         loadPosts().then(function (posts) {
 
-            posts[post.key]=post;
+            posts[post.key] = post;
             savePosts(posts).then(function () {
                 response.writeHead(200);
                 response.end();
